@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Tab Brightness Control",
+  "author": "Lakshya Gupta",
+  "version": "0.1",
+  "description": "Control Brightness Of Each Tab",
+  "browser_action": {
+    "default_popup": "index.html"
+  },
+  "content_security_policy": "script-src 'self' 'sha256-B2Jcp/mUaSiw5K6bOR3BiG6HKAk4B4faBAZl4JhLwXc='; object-src 'self'",
+  "content_scripts" : [
+    {
+      "matches": [ "<all_urls>" ],
+      "js": ["content.js"],
+      "persistent": true
+    }
+  ]
+}
