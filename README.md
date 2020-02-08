@@ -1,4 +1,4 @@
-# Tab Brightness Control
+# Tab Brightness Control ![alt text](https://raw.githubusercontent.com/Lakshya2610/tab-brightness-control/master/public/icon32.png)
 This extension allows you to control the brightness of each individual chrome tab.
 
 <div>
