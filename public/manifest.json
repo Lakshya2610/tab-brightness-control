@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Tab Brightness Control",
   "author": "Lakshya Gupta",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Control Brightness Of Each Tab",
   "permissions": ["activeTab"],
   "browser_action": {
@@ -16,6 +16,10 @@
       "persistent": true
     }
   ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
   "icons": { "16": "icon16.png",
              "32": "icon32.png",
             "128": "icon128.png",
