@@ -2,11 +2,29 @@ const tabBrightnesses = {};
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if(request.type === "updateBrightness") {
-        tabBrightnesses[sender.tab.id] = request.value;
+        if(tabBrightnesses[sender.tab.id]) {
+            tabBrightnesses[sender.tab.id].brightness = request.value;
+        }
+        else tabBrightnesses[sender.tab.id] = { brightness: request.value, persist: false };
+
         sendResponse();
     }
     else if(request.type === "requestBackgroundState") {
-        sendResponse(tabBrightnesses[sender.tab.id]);
+
+        var temp = tabBrightnesses[sender.tab.id];
+        sendResponse({ 
+            brightness : temp ? temp.brightness : null, 
+            persist: temp? temp.persist : null
+        });
+    }
+    else if(request.type === "togglePersistence") {
+        if(tabBrightnesses[sender.tab.id]) {
+            tabBrightnesses[sender.tab.id].persist = request.persist;
+            tabBrightnesses[sender.tab.id].brightness = request.brightness;
+        }
+        else tabBrightnesses[sender.tab.id] = { brightness: request.brightness, persist: request.persist };
+
+        sendResponse();
     }
 });
 

@@ -3,6 +3,8 @@ import React from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Slider from '@material-ui/core/Slider';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
+import { FormControlLabel, Switch } from '@material-ui/core';
+
 import './App.css';
 
 const PrettoSlider = withStyles({
@@ -39,7 +41,7 @@ class App extends React.Component {
 
   constructor() {
     super();
-    this.state = { sliderVal: 100 };
+    this.state = { sliderVal: 100, persist: false };
     this.port = null;
   }
 
@@ -54,12 +56,20 @@ class App extends React.Component {
 
           if(response.brightness !== this.state.sliderVal) { 
             // set slider value according to the tab brightness
-            this.setState({ sliderVal: Math.round(Number(response.brightness)) });
+            this.setState({
+              sliderVal: Math.round(Number(response.brightness)), 
+              persist: response.persist
+            });
           }
 
         }
       });
     });
+  }
+
+  toggleBrightnessPersistence(event, value) {
+    this.port.postMessage({ type: "togglePersistence", persist: value });
+    this.setState({ persist: value });
   }
 
   handleChange(event, value) {
@@ -77,7 +87,7 @@ class App extends React.Component {
 
         <br></br>
 
-        <Brightness7Icon style={{ marginLeft: "5%", color: "white" }} />
+        <Brightness7Icon style={{ marginLeft: "5%", marginBottom: "1.5%", color: "white" }} />
 
         <PrettoSlider 
         valueLabelDisplay="auto" 
@@ -85,6 +95,21 @@ class App extends React.Component {
         defaultValue={100}
         value={this.state.sliderVal}
         onChange={this.handleChange.bind(this)}
+        />
+
+        <br></br>
+
+        <FormControlLabel
+          style={{ marginLeft: "2%", color: "white" }}
+          control={
+            <Switch 
+              checked={this.state.persist}
+              onChange={this.toggleBrightnessPersistence.bind(this)}
+              value={this.state.persist}
+              color="secondary"
+            />
+          }
+          label="Persist"
         />
 
       </div>
