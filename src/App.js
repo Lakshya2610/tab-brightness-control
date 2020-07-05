@@ -41,7 +41,7 @@ class App extends React.Component {
 
   constructor() {
     super();
-    this.state = { sliderVal: 100, persist: false };
+    this.state = { sliderVal: 100, persist: true };
     this.port = null;
   }
 
@@ -50,6 +50,7 @@ class App extends React.Component {
       this.port = chrome.tabs.connect(tabs[0].id);
       // ask content script for last state
       this.port.postMessage({ type: "requestState" });
+      this.port.postMessage({ type: "togglePersistence", persist: true });
 
       this.port.onMessage.addListener((response) => {
         if(response.type === "state") {
@@ -81,8 +82,8 @@ class App extends React.Component {
     return (
       <div className="App">
 
-        <a style={{ color: "white", fontSize: "200%", fontWeight: "lighter", marginBottom: "0%", marginLeft: "32%", marginTop: "5%" }}>
-          Tab Brightness
+        <a style={{ color: "white", fontSize: "200%", fontWeight: "lighter", marginBottom: "0%", marginLeft: "35%", marginTop: "5%" }}>
+          Brightness
         </a>
 
         <br></br>
