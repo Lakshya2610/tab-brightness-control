@@ -1,31 +1,33 @@
 /*global chrome*/
-import React from 'react';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
-import Slider from '@material-ui/core/Slider';
-import Brightness7Icon from '@material-ui/icons/Brightness7';
-import { FormControlLabel, Switch } from '@material-ui/core';
+import React from "react";
+import { withStyles, makeStyles } from "@material-ui/core/styles";
+import Slider from "@material-ui/core/Slider";
+import Brightness7Icon from "@material-ui/icons/Brightness7";
+import { FormControlLabel, Switch } from "@material-ui/core";
 
-import './App.css';
+import "./App.css";
+
+const MAX_CONNECTION_ATTEMPTS = 4;
 
 const PrettoSlider = withStyles({
   root: {
-    color: '#52af77',
+    color: "#52af77",
     height: 8,
   },
   thumb: {
     height: 24,
     width: 24,
-    backgroundColor: '#fff',
-    border: '2px solid currentColor',
+    backgroundColor: "#fff",
+    border: "2px solid currentColor",
     marginTop: -8,
     marginLeft: -12,
-    '&:focus,&:hover,&$active': {
-      boxShadow: 'inherit',
+    "&:focus,&:hover,&$active": {
+      boxShadow: "inherit",
     },
   },
   active: {},
   valueLabel: {
-    left: 'calc(-50% + 4px)',
+    left: "calc(-50% + 4px)",
   },
   track: {
     height: 8,
@@ -38,34 +40,55 @@ const PrettoSlider = withStyles({
 })(Slider);
 
 class App extends React.Component {
-
   constructor() {
     super();
     this.state = { sliderVal: 100, persist: true };
     this.port = null;
+    this.connectionAttempts = 0;
   }
 
   componentDidMount() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       this.port = chrome.tabs.connect(tabs[0].id);
+      this.port.onDisconnect.addListener(
+        ((ev) => this.onDisconnectListener(tabs[0].id)).bind(this)
+      );
       // ask content script for last state
       this.port.postMessage({ type: "requestState" });
       this.port.postMessage({ type: "togglePersistence", persist: true });
-
-      this.port.onMessage.addListener((response) => {
-        if(response.type === "state") {
-
-          if(response.brightness !== this.state.sliderVal) { 
-            // set slider value according to the tab brightness
-            this.setState({
-              sliderVal: Math.round(Number(response.brightness)), 
-              persist: response.persist
-            });
-          }
-
-        }
-      });
+      this.port.onMessage.addListener(this.contentScriptListener.bind(this));
     });
+  }
+
+  contentScriptListener(response) {
+    if (response.type === "state") {
+      if (response.brightness !== this.state.sliderVal) {
+        // set slider value according to the tab brightness
+        this.setState({
+          sliderVal: Math.round(Number(response.brightness)),
+          persist: response.persist,
+        });
+      }
+    }
+  }
+
+  onDisconnectListener(tabId) {
+    if (this.connectionAttempts > MAX_CONNECTION_ATTEMPTS) return;
+    if (chrome.runtime.lastError) {
+      // connection failed. Most likely, the content script hasn't been executed, so inject it
+      this.connectionAttempts++;
+      chrome.tabs.executeScript({ file: "/content.js" });
+      this.port.onDisconnect.removeListener(
+        this.onDisconnectListener.bind(this)
+      );
+
+      this.port = chrome.tabs.connect(tabId);
+      this.port.onDisconnect.addListener(this.onDisconnectListener.bind(this));
+      // ask content script for last state
+      this.port.postMessage({ type: "requestState" });
+      this.port.postMessage({ type: "togglePersistence", persist: true });
+      this.port.onMessage.addListener(this.contentScriptListener.bind(this));
+    }
   }
 
   toggleBrightnessPersistence(event, value) {
@@ -81,21 +104,36 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-
-        <a style={{ color: "white", fontSize: "200%", fontWeight: "lighter", marginBottom: "0%", marginLeft: "35%", marginTop: "5%" }}>
+        <a
+          style={{
+            color: "white",
+            fontSize: "200%",
+            fontWeight: "lighter",
+            marginBottom: "0%",
+            marginLeft: "35%",
+            marginTop: "5%",
+          }}
+        >
           Brightness
         </a>
 
         <br></br>
 
-        <Brightness7Icon style={{ marginLeft: "5%", marginBottom: "1.5%", color: "white" }} />
+        <Brightness7Icon
+          style={{ marginLeft: "5%", marginBottom: "1.5%", color: "white" }}
+        />
 
-        <PrettoSlider 
-        valueLabelDisplay="auto" 
-        style={{ marginTop: "4%", marginLeft: "5%", width: "70%", color: "#1976d2" }} 
-        defaultValue={100}
-        value={this.state.sliderVal}
-        onChange={this.handleChange.bind(this)}
+        <PrettoSlider
+          valueLabelDisplay="auto"
+          style={{
+            marginTop: "4%",
+            marginLeft: "5%",
+            width: "70%",
+            color: "#1976d2",
+          }}
+          defaultValue={100}
+          value={this.state.sliderVal}
+          onChange={this.handleChange.bind(this)}
         />
 
         <br></br>
@@ -103,7 +141,7 @@ class App extends React.Component {
         <FormControlLabel
           style={{ marginLeft: "2%", color: "white" }}
           control={
-            <Switch 
+            <Switch
               checked={this.state.persist}
               onChange={this.toggleBrightnessPersistence.bind(this)}
               value={this.state.persist}
@@ -112,7 +150,6 @@ class App extends React.Component {
           }
           label="Persist"
         />
-
       </div>
     );
   }
