@@ -109,37 +109,30 @@ class App extends React.Component {
             color: "white",
             fontSize: "200%",
             fontWeight: "lighter",
-            marginBottom: "0%",
-            marginLeft: "35%",
-            marginTop: "5%",
           }}
         >
           Brightness
         </a>
 
-        <br></br>
+        <div id='slider-container'>
+          <Brightness7Icon
+            style={{ color: "white" }}
+          />
 
-        <Brightness7Icon
-          style={{ marginLeft: "5%", marginBottom: "1.5%", color: "white" }}
-        />
-
-        <PrettoSlider
-          valueLabelDisplay="auto"
-          style={{
-            marginTop: "4%",
-            marginLeft: "5%",
-            width: "70%",
-            color: "#1976d2",
-          }}
-          defaultValue={100}
-          value={this.state.sliderVal}
-          onChange={this.handleChange.bind(this)}
-        />
-
-        <br></br>
+          <PrettoSlider
+            valueLabelDisplay="auto"
+            style={{
+              width: "70%",
+              color: "#1976d2",
+            }}
+            defaultValue={100}
+            value={this.state.sliderVal}
+            onChange={this.handleChange.bind(this)}
+          />
+        </div>
 
         <FormControlLabel
-          style={{ marginLeft: "2%", color: "white" }}
+          style={{ color: "white" }}
           control={
             <Switch
               checked={this.state.persist}

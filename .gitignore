@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# latest chrome webstore build zip
+build.zip
