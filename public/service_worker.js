@@ -33,5 +33,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         type: "updateBrightness",
         value: tabBrightnesses[tabId],
         source: "background"
+    }).catch((err) => {
+        console.warn(err);
     });
 });
