@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Tab Brightness Control",
+  "name": "Control Tab Brightness",
   "author": "Lakshya Gupta",
   "version": "1.4",
   "description": "Control Brightness Of Each Tab",
