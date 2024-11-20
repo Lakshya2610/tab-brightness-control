@@ -1,0 +1,34 @@
+/* Ensure the page and body fill the entire viewport */
+html,
+body {
+	margin: 0;
+	height: 100%;
+	color: beige;
+}
+
+/* Create a full-screen background div */
+.options-background {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #333; /* Replace with your desired color */
+	z-index: -1; /* Make sure the background stays behind other content */
+}
+
+.options-container {
+	padding-left: 25px;
+	display: flex;
+	flex-direction: column;
+}
+
+.global-brightness-setting-container {
+	display: flex;
+	flex-direction: column;
+	width: 30%;
+}
+
+.global-brightness-value {
+	padding-left: 30px;
+}

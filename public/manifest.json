@@ -4,7 +4,7 @@
 	"author": "Lakshya Gupta",
 	"version": "1.4",
 	"description": "Control Brightness Of Each Tab",
-	"permissions": ["activeTab"],
+	"permissions": ["activeTab", "storage"],
 	"action": {
 		"default_popup": "index.html"
 	},
@@ -20,6 +20,10 @@
 	],
 	"background": {
 		"service_worker": "service_worker.js"
+	},
+	"options_ui": {
+		"page": "options.html",
+		"open_in_tab": true
 	},
 	"icons": {
 		"16": "icon16.png",

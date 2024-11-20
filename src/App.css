@@ -1,20 +1,24 @@
 .App {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  padding: 5px;
-  /* justify-content: space-between; */
-  align-items: center;
-  background-color: #212121;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	padding: 5px;
+	/* justify-content: space-between; */
+	align-items: center;
+	background-color: #212121;
 }
 
 #slider-container {
-  width: 100%;
-  padding-left: 15%;
-  padding-right: 15%;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
+	width: 100%;
+	padding-left: 15%;
+	padding-right: 15%;
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
 }
 
-
+.second-row {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
