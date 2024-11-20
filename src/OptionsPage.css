@@ -32,3 +32,27 @@ body {
 .global-brightness-value {
 	padding-left: 30px;
 }
+
+/* Per Page Brightnesses */
+
+.saved-sites-container {
+	margin-top: 30px;
+}
+
+.add-site-form {
+	margin-bottom: 20px;
+}
+
+.saved-sites-list {
+	margin-top: 10px;
+}
+
+.saved-site-item {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+.saved-site-item button {
+	margin-left: 10px;
+}

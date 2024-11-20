@@ -5,10 +5,12 @@ const MessageType = {
 	State: 2,
 	UpdateBrightness: 3,
 	TogglePersistence: 4,
+	SaveBrightness: 5,
 };
 
+const SAVED_BRIGHTNESSES = "savedBrightnesses";
+
 const tag = document.createElement("div");
-document.body.appendChild(tag);
 
 tag.style.backgroundColor = "black";
 tag.style.position = "fixed";
@@ -23,22 +25,54 @@ tag.style.zIndex = String(Number.MAX_SAFE_INTEGER) + "";
 var persist = false;
 var rawBrightnessVal = 100;
 
+function InjectOverlay() {
+	const body = document.body;
+	if (body) {
+		document.body.appendChild(tag);
+	} else {
+		requestAnimationFrame(InjectOverlay);
+	}
+}
+
+function LogInfo(string, ...args) {
+	console.log(`[ControlTabBrightness]: ${string}`, ...args);
+}
+
 function UpdateBrightness(newValue) {
-	console.log(`[ControlTabBrightness]: Got new value ${newValue}`);
+	LogInfo(`Got new value ${newValue}`);
 	if (newValue) {
 		rawBrightnessVal = newValue;
 		tag.style.opacity = String(1 - newValue / 100.0);
 	}
 }
 
+async function SaveBrightnessForPage(brightness) {
+	const url = window.location.host;
+	const settings = await chrome.storage.sync.get("savedBrightnesses");
+	LogInfo("Settings - ", settings);
+
+	let perPageValues = settings.savedBrightnesses;
+	if (perPageValues === undefined) {
+		LogInfo("Init per page values");
+		perPageValues = {};
+	}
+	perPageValues[url] = brightness;
+	settings.savedBrightnesses = perPageValues;
+
+	chrome.storage.sync.set(settings);
+}
+
 function RespectGlobalPrefsAndUpdateBrightness(brightness, shouldPersist) {
-	const keys = ["applyBrightnessGlobally", "globalBrightnessValue"];
+	const keys = ["applyBrightnessGlobally", "globalBrightnessValue", "savedBrightnesses"];
 
 	chrome.storage.sync.get(keys, (opts) => {
-		console.log("[ControlTabBrightness]: Opts ", opts);
+		LogInfo("Opts ", opts);
 
 		const applyGlobally = opts["applyBrightnessGlobally"];
 		let globalValue = opts["globalBrightnessValue"];
+
+		const perPageValues = opts["savedBrightnesses"];
+		const url = window.location.host;
 
 		if (applyGlobally === true && typeof globalValue === "number") {
 			globalValue = Math.max(globalValue, 0);
@@ -46,6 +80,10 @@ function RespectGlobalPrefsAndUpdateBrightness(brightness, shouldPersist) {
 
 			UpdateBrightness(globalValue);
 			persist = true;
+		} else if (url in perPageValues) {
+			const savedValue = perPageValues[url];
+			UpdateBrightness(savedValue);
+			persist = shouldPersist;
 		} else {
 			UpdateBrightness(brightness);
 			persist = shouldPersist;
@@ -56,7 +94,7 @@ function RespectGlobalPrefsAndUpdateBrightness(brightness, shouldPersist) {
 chrome.runtime.sendMessage(
 	{ type: MessageType.RequestBackgroundState },
 	function responseCallback(res) {
-		console.log(`[ControlTabBrightness]: Response: `, res);
+		LogInfo(`Response: `, res);
 		if (res.persist !== null) {
 			persist = res.persist;
 		}
@@ -68,9 +106,9 @@ chrome.runtime.sendMessage(
 );
 
 chrome.runtime.onConnect.addListener(function (channel) {
-	console.log(`[ControlTabBrightness]: Connected to service worker on channel `, channel);
+	LogInfo(`Connected to service worker on channel `, channel);
 	channel.onMessage.addListener(function (msg) {
-		console.log(`[ControlTabBrightness]: Message`, msg);
+		LogInfo(`Message `, msg);
 		switch (msg.type) {
 			case MessageType.RequestState: {
 				// report state to extension popup
@@ -102,10 +140,16 @@ chrome.runtime.onConnect.addListener(function (channel) {
 				break;
 			}
 
+			case MessageType.SaveBrightness: {
+				SaveBrightnessForPage(msg.newValue);
+				break;
+			}
+
 			default:
 				break;
 		}
 	});
 });
 
+InjectOverlay();
 RespectGlobalPrefsAndUpdateBrightness(100, true);
