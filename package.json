@@ -2,7 +2,7 @@
 	"name": "tab-brightness-control",
 	"author": "Lakshya Gupta",
 	"repository": "https://github.com/Lakshya2610/tab-brightness-control",
-	"version": "1.4.0",
+	"version": "2.0.0",
 	"private": true,
 	"dependencies": {
 		"@material-ui/core": "^4.9.1",
