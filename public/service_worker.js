@@ -5,12 +5,11 @@ const MessageType = {
 	State: 2,
 	UpdateBrightness: 3,
 	TogglePersistence: 4,
+	SaveBrightness: 5,
+	Reset: 6
 };
 
-const GLOBAL_BRIGHTNESS_TAB_ID = Number.MAX_SAFE_INTEGER;
-const tabBrightnesses = {
-	[GLOBAL_BRIGHTNESS_TAB_ID]: { brightness: 100, persist: true },
-};
+const tabBrightnesses = {};
 
 function SendMessage(recv, msg) {
 	chrome.tabs.sendMessage(recv, msg).catch((err) => {
@@ -22,7 +21,6 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
 	let response = null;
 	switch (request.type) {
 		case MessageType.RequestBackgroundState: {
-			const keys = ["applyBrightnessGlobally", "globalBrightnessValue"];
 			var targetTabID = sender.tab.id;
 
 			var temp = tabBrightnesses[targetTabID];
@@ -69,6 +67,16 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
 			sendResponse();
 			return;
 		}
+
+		case MessageType.Reset: {
+			if (sender.tab.id in tabBrightnesses) {
+				delete tabBrightnesses[sender.tab.id];
+			}
+
+			sendResponse();
+			return;
+		}
+
 		default:
 			sendResponse();
 			return;

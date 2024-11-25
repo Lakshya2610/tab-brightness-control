@@ -6,9 +6,8 @@ const MessageType = {
 	UpdateBrightness: 3,
 	TogglePersistence: 4,
 	SaveBrightness: 5,
+	Reset: 6,
 };
-
-const SAVED_BRIGHTNESSES = "savedBrightnesses";
 
 const tag = document.createElement("div");
 
@@ -21,6 +20,7 @@ tag.style.top = "0";
 tag.style.left = "0";
 tag.style.pointerEvents = "none";
 tag.style.zIndex = String(Number.MAX_SAFE_INTEGER) + "";
+tag.className = "control-tab-brightness-overlay";
 
 var persist = false;
 var rawBrightnessVal = 100;
@@ -62,7 +62,29 @@ async function SaveBrightnessForPage(brightness) {
 	chrome.storage.sync.set(settings);
 }
 
+async function Reset() {
+	const url = window.location.host;
+	const settings = await chrome.storage.sync.get("savedBrightnesses");
+
+	LogInfo("Reset: resetting for page", url);
+
+	let perPageValues = settings.savedBrightnesses;
+	if (perPageValues !== undefined && url in perPageValues) {
+		LogInfo("Reset: deleting saved brightness for ", url);
+		delete perPageValues[url];
+		await chrome.storage.sync.set(settings);
+	}
+
+	RespectGlobalPrefsAndUpdateBrightness(100, false);
+
+	chrome.runtime.sendMessage(
+		{ type: MessageType.Reset },
+		function responseCallback(res) {},
+	);
+}
+
 function RespectGlobalPrefsAndUpdateBrightness(brightness, shouldPersist) {
+	LogInfo(`RespectGlobalPrefsAndUpdateBrightness: set ${brightness}, persist=${shouldPersist}`);
 	const keys = ["applyBrightnessGlobally", "globalBrightnessValue", "savedBrightnesses"];
 
 	chrome.storage.sync.get(keys, (opts) => {
@@ -114,7 +136,7 @@ chrome.runtime.onConnect.addListener(function (channel) {
 				// report state to extension popup
 				channel.postMessage({
 					type: MessageType.State,
-					brightness: (1 - tag.style.opacity) * 100,
+					brightness: (1 - Number(tag.style.opacity)) * 100,
 					persist,
 				});
 				break;
@@ -145,6 +167,11 @@ chrome.runtime.onConnect.addListener(function (channel) {
 				break;
 			}
 
+			case MessageType.Reset: {
+				Reset();
+				break;
+			}
+
 			default:
 				break;
 		}
@@ -152,4 +179,4 @@ chrome.runtime.onConnect.addListener(function (channel) {
 });
 
 InjectOverlay();
-RespectGlobalPrefsAndUpdateBrightness(100, true);
+RespectGlobalPrefsAndUpdateBrightness(100, false);

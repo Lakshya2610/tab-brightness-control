@@ -30,7 +30,7 @@
 	align-items: center;
 	width: 100%;
 	gap: 15px;
-	margin-bottom: 30px;
+	margin-bottom: 5px;
 }
 
 .settings-container {
@@ -43,4 +43,9 @@
 
 .settings-footer {
 	margin-top: 20px;
+}
+
+.settings-button-row {
+	display: flex;
+	flex-direction: row;
 }

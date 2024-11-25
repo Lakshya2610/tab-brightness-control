@@ -36,7 +36,7 @@ body {
 /* Per Page Brightnesses */
 
 .saved-sites-container {
-	margin-top: 30px;
+	width: 30%;
 }
 
 .add-site-form {
@@ -55,4 +55,31 @@ body {
 
 .saved-site-item button {
 	margin-left: 10px;
+}
+
+.saved-sites-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 20px;
+}
+
+.saved-sites-table th,
+.saved-sites-table td {
+	padding: 10px;
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+}
+
+.saved-sites-table th {
+	background-color: transparent;
+	font-weight: bold;
+}
+
+.saved-sites-table td:last-child {
+	text-align: center;
+}
+
+.saved-sites-table .MuiSlider-root {
+	width: 100%;
+	margin: 0;
 }
