@@ -4,7 +4,7 @@
 	"author": "Lakshya Gupta",
 	"version": "1.4",
 	"description": "Control Brightness Of Each Tab",
-	"permissions": ["activeTab", "storage"],
+	"permissions": ["activeTab", "storage", "scripting"],
 	"action": {
 		"default_popup": "index.html"
 	},

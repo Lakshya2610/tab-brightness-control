@@ -28,7 +28,7 @@ const MessageType = {
 
 const CustomSlider = withStyles({
 	root: {
-		color: "#4A90E2", // Soft blue for elegance
+		color: "#4A90E2",
 		height: 4,
 		padding: "15px 0",
 	},
@@ -45,8 +45,8 @@ const CustomSlider = withStyles({
 	},
 	active: {},
 	valueLabel: {
-		left: "calc(-50% + 4px)",
-		color: "#fff",
+		left: "calc(-50%)",
+		color: "#4A90E2",
 	},
 	track: {
 		height: 4,
@@ -124,11 +124,20 @@ class App extends React.Component {
 		if (this.connectionAttempts > MAX_CONNECTION_ATTEMPTS) return;
 		if (chrome.runtime.lastError) {
 			this.connectionAttempts++;
-			chrome.tabs.executeScript({ file: "/content.js" });
+			console.log(
+				`Failed to connect to content script, trying again (${this.connectionAttempts} / ${MAX_CONNECTION_ATTEMPTS}`,
+			);
+
+			chrome.scripting.executeScript({
+				target: { tabId: tabId, allFrames: true },
+				files: ["/content.js"],
+			});
 			this.port.onDisconnect.removeListener(this.onDisconnectListener.bind(this));
 
 			this.port = chrome.tabs.connect(tabId);
-			this.port.onDisconnect.addListener(this.onDisconnectListener.bind(this));
+			this.port.onDisconnect.addListener(
+				((_ev) => this.onDisconnectListener(tabId)).bind(this),
+			);
 			this.port.postMessage({ type: MessageType.RequestState, source: "App" });
 		}
 	}
@@ -184,7 +193,7 @@ class App extends React.Component {
 							flexDirection: "column",
 							alignItems: "center",
 							width: "95%",
-							marginBottom: "30px"
+							marginBottom: "30px",
 						}}
 					>
 						<div className="slider-container">
