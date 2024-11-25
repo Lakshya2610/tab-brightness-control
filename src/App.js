@@ -74,6 +74,7 @@ class App extends React.Component {
 			sliderVal: 100,
 			persist: false,
 			globalBrightnessOverride: GLOBAL_BRIGHTNESS_OVERRIDE_NO_OVERRIDE,
+			errored: false,
 		};
 		this.port = null;
 		this.connectionAttempts = 0;
@@ -121,7 +122,12 @@ class App extends React.Component {
 	}
 
 	onDisconnectListener(tabId) {
-		if (this.connectionAttempts > MAX_CONNECTION_ATTEMPTS) return;
+		if (this.connectionAttempts > MAX_CONNECTION_ATTEMPTS) {
+			console.log(`Failed to connect to content script - `, chrome.runtime.lastError);
+			this.setState({ errored: true });
+			return;
+		}
+
 		if (chrome.runtime.lastError) {
 			this.connectionAttempts++;
 			console.log(
@@ -139,6 +145,8 @@ class App extends React.Component {
 				((_ev) => this.onDisconnectListener(tabId)).bind(this),
 			);
 			this.port.postMessage({ type: MessageType.RequestState, source: "App" });
+
+			this.setState({ errored: false });
 		}
 	}
 
@@ -203,14 +211,22 @@ class App extends React.Component {
 								defaultValue={100}
 								value={this.state.sliderVal}
 								onChange={this.handleChange.bind(this)}
-								disabled={this.isSliderDisabled()}
+								disabled={this.isSliderDisabled() || this.state.errored}
 							/>
 						</div>
 
-						{this.isSliderDisabled() && (
+						{this.isSliderDisabled() && !this.state.errored && (
 							<span>
 								Global brightness set to {this.state.globalBrightnessOverride}%,
 								change it in options
+							</span>
+						)}
+
+						{this.state.errored && (
+							<span style={{ color: "red" }}>
+								Failed to inject brightness overlay, please close and re-open the
+								tab to change brightness. (Note: some pages don't allow
+								modifications (e.g.: chrome webstore))
 							</span>
 						)}
 					</div>
