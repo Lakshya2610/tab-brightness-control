@@ -4,6 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Slider from "@material-ui/core/Slider";
 import Brightness7Icon from "@material-ui/icons/Brightness7";
 import { FormControlLabel, Switch, Button } from "@material-ui/core";
+import SuccessNotification from "./SuccessNotification";
 import "./App.css";
 
 /**
@@ -74,7 +75,9 @@ class App extends React.Component {
 			sliderVal: 100,
 			persist: false,
 			globalBrightnessOverride: GLOBAL_BRIGHTNESS_OVERRIDE_NO_OVERRIDE,
+			brightnessReason: "default",
 			errored: false,
+			successNotificationOpen: false
 		};
 		this.port = null;
 		this.connectionAttempts = 0;
@@ -112,12 +115,11 @@ class App extends React.Component {
 	 */
 	contentScriptListener(response) {
 		if (response.type === MessageType.State) {
-			if (response.brightness !== this.state.sliderVal) {
-				this.setState({
-					sliderVal: Math.round(Number(response.brightness)),
-					persist: response.persist,
-				});
-			}
+			this.setState({
+				sliderVal: Math.round(Number(response.brightness)),
+				persist: response.persist,
+				brightnessReason: response.reason,
+			});
 		}
 	}
 
@@ -151,7 +153,26 @@ class App extends React.Component {
 	}
 
 	isSliderDisabled() {
-		return this.state.globalBrightnessOverride !== GLOBAL_BRIGHTNESS_OVERRIDE_NO_OVERRIDE;
+		return (
+			this.state.brightnessReason === "global_setting" ||
+			this.state.brightnessReason === "page_setting"
+		);
+	}
+
+	getSliderDisabledReason() {
+		if (this.state.brightnessReason === "default") {
+			return "";
+		} else if (this.state.brightnessReason === "global_setting") {
+			return `Global brightness set to ${this.state.globalBrightnessOverride}%,
+			change it in options`;
+		} else if (this.state.brightnessReason === "page_setting") {
+			return `Page brightness set to ${this.state.sliderVal}%,
+			change it in options`;
+		}
+	}
+
+	usingGlobalBrightness() {
+		return this.state.brightnessReason === "global_setting";
 	}
 
 	toggleBrightnessPersistence(_event, value) {
@@ -160,6 +181,7 @@ class App extends React.Component {
 			persist: value,
 			source: "App",
 		});
+
 		this.setState({ persist: value });
 	}
 
@@ -178,6 +200,8 @@ class App extends React.Component {
 			newValue: this.state.sliderVal,
 			source: "App",
 		});
+
+		this.setState({ successNotificationOpen: true });
 	}
 
 	resetBrightnessForSite() {
@@ -186,7 +210,7 @@ class App extends React.Component {
 			source: "App",
 		});
 
-		this.setState({ persist: false, sliderVal: 100 });
+		this.setState({ persist: false, sliderVal: 100, brightnessReason: "default" });
 	}
 
 	render() {
@@ -216,10 +240,7 @@ class App extends React.Component {
 						</div>
 
 						{this.isSliderDisabled() && !this.state.errored && (
-							<span>
-								Global brightness set to {this.state.globalBrightnessOverride}%,
-								change it in options
-							</span>
+							<span>{this.getSliderDisabledReason()}</span>
 						)}
 
 						{this.state.errored && (
@@ -260,12 +281,13 @@ class App extends React.Component {
 							<Button
 								variant="contained"
 								style={{
-									backgroundColor: "#4A90E2",
+									backgroundColor: this.usingGlobalBrightness() ? "grey" : "#4A90E2",
 									color: "#fff",
 									textTransform: "none",
 									marginLeft: "5px",
 								}}
 								onClick={this.resetBrightnessForSite.bind(this)}
+								disabled={this.usingGlobalBrightness()}
 							>
 								Reset
 							</Button>
@@ -285,6 +307,11 @@ class App extends React.Component {
 							Options
 						</Button>
 					</div>
+
+					<SuccessNotification
+						open={this.state.successNotificationOpen}
+						SetOpen={(v) => this.setState({ successNotificationOpen: v }).bind(this)}
+					/>
 				</div>
 			</div>
 		);

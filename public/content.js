@@ -93,7 +93,7 @@ function RespectGlobalPrefsAndUpdateBrightness(brightness, shouldPersist) {
 		const applyGlobally = opts["applyBrightnessGlobally"];
 		let globalValue = opts["globalBrightnessValue"];
 
-		const perPageValues = opts["savedBrightnesses"];
+		const perPageValues = opts["savedBrightnesses"] || {};
 		const url = window.location.host;
 
 		if (applyGlobally === true && typeof globalValue === "number") {
@@ -113,6 +113,23 @@ function RespectGlobalPrefsAndUpdateBrightness(brightness, shouldPersist) {
 	});
 }
 
+async function GetBrightnessReason() {
+	const keys = ["applyBrightnessGlobally", "globalBrightnessValue", "savedBrightnesses"];
+	const opts = await chrome.storage.sync.get(keys);
+
+	const applyGlobally = opts["applyBrightnessGlobally"];
+	const perPageValues = opts["savedBrightnesses"] || {};
+	const url = window.location.host;
+
+	if (applyGlobally === true) {
+		return "global_setting";
+	} else if (url in perPageValues) {
+		return "page_setting";
+	}
+
+	return "default";
+}
+
 chrome.runtime.sendMessage(
 	{ type: MessageType.RequestBackgroundState },
 	function responseCallback(res) {
@@ -129,15 +146,17 @@ chrome.runtime.sendMessage(
 
 chrome.runtime.onConnect.addListener(function (channel) {
 	LogInfo(`Connected to service worker on channel `, channel);
-	channel.onMessage.addListener(function (msg) {
+	channel.onMessage.addListener(async function (msg) {
 		LogInfo(`Message `, msg);
 		switch (msg.type) {
 			case MessageType.RequestState: {
 				// report state to extension popup
+				const reason = await GetBrightnessReason();
 				channel.postMessage({
 					type: MessageType.State,
 					brightness: (1 - Number(tag.style.opacity)) * 100,
 					persist,
+					reason
 				});
 				break;
 			}

@@ -41,16 +41,16 @@ function SaveAndApplyChange(value, key, setfunc) {
 
 /**
  * Save brightness for a specific website
+ * @param {ChromeStorageThrottledWriter} writer
  * @param {string} url
  * @param {number} brightness
  * @param {CallableFunction} setSavedBrightnesses
  */
-function SaveSiteBrightness(url, brightness, setSavedBrightnesses) {
+function SaveSiteBrightness(writer, url, brightness, setSavedBrightnesses) {
 	chrome.storage.sync.get("savedBrightnesses", (result) => {
 		const updatedBrightnesses = result.savedBrightnesses || {};
 		updatedBrightnesses[url] = brightness;
-		chrome.storage.sync.set({ savedBrightnesses: updatedBrightnesses });
-		setSavedBrightnesses(updatedBrightnesses);
+		writer.Write(updatedBrightnesses, "savedBrightnesses", setSavedBrightnesses);
 	});
 }
 
@@ -71,12 +71,18 @@ function DeleteSiteBrightness(url, setSavedBrightnesses) {
 function PageBrightnessTable({ savedBrightnesses, SetSavedBrightnesses }) {
 	const [newSiteUrl, SetNewSiteUrl] = React.useState("");
 	const [newSiteBrightness, SetNewSiteBrightness] = React.useState(DEFAULT_INIT_BRIGHTNESS);
+	const [chromeStorageWriter, _] = React.useState(
+		new ChromeStorageThrottledWriter(THROTTLED_WRITE_DELAY_MS),
+	);
 
 	// Add or update the brightness for a specific website
-	const handleAddSite = () => {
+	const handleAddSite = async () => {
 		if (!newSiteUrl || newSiteUrl in savedBrightnesses) {
 			return;
 		}
+
+		savedBrightnesses[newSiteUrl] = newSiteBrightness;
+		SaveAndApplyChange(savedBrightnesses, "savedBrightnesses", SetSavedBrightnesses);
 
 		SaveSiteBrightness(newSiteUrl, newSiteBrightness, SetSavedBrightnesses);
 		SetNewSiteUrl("");
@@ -104,7 +110,12 @@ function PageBrightnessTable({ savedBrightnesses, SetSavedBrightnesses }) {
 								<Slider
 									value={brightness}
 									onChange={(_, v) =>
-										SaveSiteBrightness(url, v, SetSavedBrightnesses)
+										SaveSiteBrightness(
+											chromeStorageWriter,
+											url,
+											v,
+											SetSavedBrightnesses,
+										)
 									}
 									min={0}
 									max={100}
