@@ -84,7 +84,7 @@ function PageBrightnessTable({ savedBrightnesses, SetSavedBrightnesses }) {
 		savedBrightnesses[newSiteUrl] = newSiteBrightness;
 		SaveAndApplyChange(savedBrightnesses, "savedBrightnesses", SetSavedBrightnesses);
 
-		SaveSiteBrightness(newSiteUrl, newSiteBrightness, SetSavedBrightnesses);
+		SaveSiteBrightness(chromeStorageWriter, newSiteUrl, newSiteBrightness, SetSavedBrightnesses);
 		SetNewSiteUrl("");
 		SetNewSiteBrightness(DEFAULT_INIT_BRIGHTNESS); // Reset input fields
 	};
@@ -202,23 +202,41 @@ function OptionsPage() {
 	const [chromeStorageWriter, _] = React.useState(
 		new ChromeStorageThrottledWriter(THROTTLED_WRITE_DELAY_MS),
 	);
+	const [forceUpdateTrigger, SetForceUpdateTrigger] = React.useState(0);
 
 	// Load options from Chrome storage
 	React.useEffect(() => {
-		chrome.storage.sync.get(
-			{
-				applyBrightnessGlobally: applyBrightnessGlobally,
-				globalBrightnessValue: globalBrightnessValue,
-				savedBrightnesses: savedBrightnesses,
-			},
-			(savedOpts) => {
-				console.log(savedOpts);
-				SetApplyBrightnessGlobally(savedOpts.applyBrightnessGlobally);
-				SetGlobalBrightnessValue(savedOpts.globalBrightnessValue);
-				SetSavedBrightnesses(savedOpts.savedBrightnesses || {});
-			},
-		);
-	}, []);
+		if (!chrome || !chrome.storage || !chrome.storage.sync) {
+			console.warn("Chrome API not available");
+			return () => {};
+		}
+
+		try {
+			chrome.storage.sync.get(
+				{
+					applyBrightnessGlobally: false,
+					globalBrightnessValue: 100,
+					savedBrightnesses: {},
+				},
+				(savedOpts) => {
+					console.log("Saved Options:", savedOpts);
+					SetApplyBrightnessGlobally(savedOpts.applyBrightnessGlobally);
+					SetGlobalBrightnessValue(savedOpts.globalBrightnessValue);
+					SetSavedBrightnesses(savedOpts.savedBrightnesses || {});
+				},
+			);
+		} catch (e) {
+			console.log("useEffect: ", e);
+		}
+
+		return () => {};
+	}, [forceUpdateTrigger]);
+
+	const forceRun = () => {
+		SetForceUpdateTrigger(1);
+	};
+
+	setTimeout(forceRun, 100);
 
 	return (
 		<div className="options-container">

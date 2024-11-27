@@ -310,7 +310,7 @@ class App extends React.Component {
 
 					<SuccessNotification
 						open={this.state.successNotificationOpen}
-						SetOpen={(v) => this.setState({ successNotificationOpen: v }).bind(this)}
+						SetOpen={(v) => this.setState({ successNotificationOpen: v })}
 					/>
 				</div>
 			</div>
