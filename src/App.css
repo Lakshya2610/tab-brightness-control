@@ -1,51 +1,7 @@
-.App {
-	background-color: #1c1c1e; /* Dark, subtle background */
-	color: #eaeaea;
-	height: 100vh;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-family: "Inter", "Helvetica Neue", Arial, sans-serif; /* Clean font */
+html, body, #root {
+  width: 380px;
 }
 
-.App-container {
-	background: #2c2c2e; /* Subtle contrast with background */
-	padding: 30px;
-	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-	width: 360px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-.App-title {
-	margin-bottom: 25px;
-	font-size: 1.5rem;
-	color: #ffffff;
-	font-weight: 600;
-}
-
-.slider-container {
-	display: flex;
-	align-items: center;
-	width: 100%;
-	gap: 15px;
-	margin-bottom: 5px;
-}
-
-.settings-container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	width: 100%;
-	gap: 20px;
-}
-
-.settings-footer {
-	margin-top: 20px;
-}
-
-.settings-button-row {
-	display: flex;
-	flex-direction: row;
+#root {
+  min-height: 250px;
 }

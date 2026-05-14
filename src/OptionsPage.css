@@ -1,85 +1,9 @@
-/* Ensure the page and body fill the entire viewport */
-html,
+html, body, #root {
+  margin: 0;
+  height: 100%;
+}
+
 body {
-	margin: 0;
-	height: 100%;
-	color: beige;
-}
-
-/* Create a full-screen background div */
-.options-background {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: #333; /* Replace with your desired color */
-	z-index: -1; /* Make sure the background stays behind other content */
-}
-
-.options-container {
-	padding-left: 25px;
-	display: flex;
-	flex-direction: column;
-}
-
-.global-brightness-setting-container {
-	display: flex;
-	flex-direction: column;
-	width: 30%;
-}
-
-.global-brightness-value {
-	padding-left: 30px;
-}
-
-/* Per Page Brightnesses */
-
-.saved-sites-container {
-	width: 30%;
-}
-
-.add-site-form {
-	margin-bottom: 20px;
-}
-
-.saved-sites-list {
-	margin-top: 10px;
-}
-
-.saved-site-item {
-	display: flex;
-	justify-content: space-between;
-	margin-bottom: 10px;
-}
-
-.saved-site-item button {
-	margin-left: 10px;
-}
-
-.saved-sites-table {
-	width: 100%;
-	border-collapse: collapse;
-	margin-top: 20px;
-}
-
-.saved-sites-table th,
-.saved-sites-table td {
-	padding: 10px;
-	text-align: left;
-	border-bottom: 1px solid #ddd;
-}
-
-.saved-sites-table th {
-	background-color: transparent;
-	font-weight: bold;
-}
-
-.saved-sites-table td:last-child {
-	text-align: center;
-}
-
-.saved-sites-table .MuiSlider-root {
-	width: 100%;
-	margin: 0;
+  background-color: #0d0d0d;
+  color: #eaeaea;
 }

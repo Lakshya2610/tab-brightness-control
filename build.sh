@@ -1,8 +1,12 @@
 #!/bin/bash
-# need inlining disabled in react builds because of chrome extension security policy
-INLINE_RUNTIME_CHUNK=false NODE_OPTIONS=--openssl-legacy-provider npm run build
+npm run build
 BUILD_SUCCESS=$?
 
 if [[ $BUILD_SUCCESS -eq 0 ]]; then
-    python3 postbuild.py
+    echo "Creating Firefox build..."
+    rm -rf build-firefox
+    cp -r build build-firefox
+    cp public/manifest.firefox.json build-firefox/manifest.json
+    rm -f build-firefox/manifest.firefox.json
+    echo "Firefox build created at build-firefox/"
 fi

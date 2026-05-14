@@ -162,7 +162,7 @@ chrome.runtime.onConnect.addListener(function (channel) {
 			}
 
 			case MessageType.UpdateBrightness: {
-				RespectGlobalPrefsAndUpdateBrightness(msg.newValue, persist);
+				UpdateBrightness(msg.newValue);
 
 				if (msg.source === "App" && persist) {
 					chrome.runtime.sendMessage(

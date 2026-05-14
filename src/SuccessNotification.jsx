@@ -1,28 +1,15 @@
 import React from "react";
-import { Snackbar } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
+import { Check } from "lucide-react";
 
-function SuccessNotification({ open, SetOpen }) {
+function SuccessNotification({ open }) {
+  if (!open) return null;
 
-	const handleClose = (_, __) => {
-		// Prevent closing when clicking outside or pressing Esc
-		SetOpen(false);
-	};
-
-	return (
-		<div>
-			<Snackbar
-				open={open}
-				autoHideDuration={1500}
-				onClose={handleClose}
-				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-			>
-				<Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-					Saved
-				</Alert>
-			</Snackbar>
-		</div>
-	);
+  return (
+    <div className="fixed bottom-3 right-3 flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm text-white shadow-lg animate-in fade-in slide-in-from-bottom-2">
+      <Check className="h-4 w-4" />
+      Saved
+    </div>
+  );
 }
 
 export default SuccessNotification;

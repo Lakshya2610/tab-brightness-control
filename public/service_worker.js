@@ -12,12 +12,10 @@ const MessageType = {
 const tabBrightnesses = {};
 
 function SendMessage(recv, msg) {
-	chrome.tabs.sendMessage(recv, msg).catch((err) => {
-		console.warn(err);
-	});
+	chrome.tabs.sendMessage(recv, msg, () => {});
 }
 
-chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 	let response = null;
 	switch (request.type) {
 		case MessageType.RequestBackgroundState: {
@@ -84,13 +82,9 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
 });
 
 chrome.tabs.onUpdated.addListener(function (tabId, _changeInfo, _tab) {
-	chrome.tabs
-		.sendMessage(tabId, {
-			type: MessageType.UpdateBrightness,
-			value: tabBrightnesses[tabId],
-			source: "background",
-		})
-		.catch((err) => {
-			console.warn(err);
-		});
+	chrome.tabs.sendMessage(tabId, {
+		type: MessageType.UpdateBrightness,
+		value: tabBrightnesses[tabId],
+		source: "background",
+	}, () => {});
 });

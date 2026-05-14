@@ -1,16 +1,14 @@
 {
-	"manifest_version": 3,
+	"manifest_version": 2,
 	"name": "Control Tab Brightness",
 	"author": "Lakshya Gupta",
 	"version": "2.0",
 	"description": "Control Brightness Of Each Tab",
-	"permissions": ["activeTab", "storage", "scripting"],
-	"action": {
+	"permissions": ["activeTab", "storage", "scripting", "<all_urls>"],
+	"browser_action": {
 		"default_popup": "index.html"
 	},
-	"content_security_policy": {
-		"extension_pages": "script-src 'self'; object-src 'self'"
-	},
+	"content_security_policy": "script-src 'self'; object-src 'self'",
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
@@ -19,7 +17,8 @@
 		}
 	],
 	"background": {
-		"service_worker": "service_worker.js"
+		"scripts": ["service_worker.js"],
+		"persistent": false
 	},
 	"options_ui": {
 		"page": "options.html",
@@ -31,5 +30,10 @@
 		"128": "icon128.png",
 		"256": "icon256.png",
 		"512": "icon512.png"
+	},
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "tab-brightness-control@lakshyagupta.com"
+		}
 	}
 }
