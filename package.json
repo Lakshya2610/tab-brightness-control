@@ -2,7 +2,7 @@
   "name": "tab-brightness-control",
   "author": "Lakshya Gupta",
   "repository": "https://github.com/Lakshya2610/tab-brightness-control",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "scripts": {
     "build": "vite build",
